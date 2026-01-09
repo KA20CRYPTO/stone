@@ -2,7 +2,8 @@ import streamlit as st
 import random
 import firebase_admin
 from firebase_admin import credentials, db
-# Session state for login
+import requests
+
 if "user" not in st.session_state:
     st.session_state.user = None
 
@@ -18,23 +19,98 @@ ref = db.reference("games")
 
 st.set_page_config(page_title="Stone Paper Scissors", page_icon="✂️")
 st.title("🪨📄✂️ Stone Paper Scissors")
-# -------- SIGN IN --------
+st.subheader("🔐 Login / Sign Up")
+
 if st.session_state.user is None:
-    st.subheader("Sign In")
+    email = st.text_input("Email")
+    password = st.text_input("Password", type="password")
 
-    username = st.text_input("Choose a username")
+    col1, col2 = st.columns(2)
 
-    if st.button("Sign In"):
-        if username.strip() == "":
-            st.warning("Username cannot be empty")
-        else:
-            st.session_state.user = username
-            st.success(f"Welcome, {username}!")
-            st.rerun()
+    with col1:
+        if st.button("Login"):
+            res = firebase_login(email, password)
+            if "idToken" in res:
+                st.session_state.user = {
+                    "email": email,
+                    "uid": res["localId"],
+                    "token": res["idToken"]
+                }
+                st.success("Logged in successfully")
+                st.rerun()
+            else:
+                st.error(res.get("error", {}).get("message", "Login failed"))
 
-    st.stop()  # stop app here until signed in
+    with col2:
+        if st.button("Sign Up"):
+            res = firebase_signup(email, password)
+            if "idToken" in res:
+                st.success("Account created! Please log in.")
+            else:
+                st.error(res.get("error", {}).get("message", "Signup failed"))
+
+    st.stop()
+
+# -------- SIGN IN --------
+
 player = st.session_state.user
 st.write(f"👤 Logged in as: **{player}**")
+# ---------- AUTH CONFIG ----------
+FIREBASE_API_KEY = st.secrets["firebase_web"]["apiKey"]
+
+def firebase_login(email, password):
+    url = (
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+        f"?key={FIREBASE_API_KEY}"
+    )
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    r = requests.post(url, json=payload)
+    return r.json()
+
+def firebase_signup(email, password):
+    url = (
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp"
+        f"?key={FIREBASE_API_KEY}"
+    )
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    r = requests.post(url, json=payload)
+    return r.json()
+# ---------- AUTH CONFIG ----------
+FIREBASE_API_KEY = st.secrets["firebase_web"]["apiKey"]
+
+def firebase_login(email, password):
+    url = (
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+        f"?key={FIREBASE_API_KEY}"
+    )
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    r = requests.post(url, json=payload)
+    return r.json()
+
+def firebase_signup(email, password):
+    url = (
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp"
+        f"?key={FIREBASE_API_KEY}"
+    )
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    r = requests.post(url, json=payload)
+    return r.json()
 
 
 
