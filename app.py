@@ -7,6 +7,34 @@ import requests
 if "user" not in st.session_state:
     st.session_state.user = None
 
+# ---------- AUTH CONFIG ----------
+FIREBASE_API_KEY = st.secrets["firebase_web"]["apiKey"]
+
+def firebase_login(email, password):
+    url = (
+        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
+        f"?key={FIREBASE_API_KEY}"
+    )
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    r = requests.post(url, json=payload)
+    return r.json()
+
+def firebase_signup(email, password):
+    url = (
+        "https://identitytoolkit.googleapis.com/v1/accounts:signUp"
+        f"?key={FIREBASE_API_KEY}"
+    )
+    payload = {
+        "email": email,
+        "password": password,
+        "returnSecureToken": True
+    }
+    r = requests.post(url, json=payload)
+    return r.json()
 
 # Firebase init using Streamlit secrets
 if not firebase_admin._apps:
@@ -56,61 +84,6 @@ if st.session_state.user is None:
 player = st.session_state.user
 st.write(f"👤 Logged in as: **{player}**")
 # ---------- AUTH CONFIG ----------
-FIREBASE_API_KEY = st.secrets["firebase_web"]["apiKey"]
-
-def firebase_login(email, password):
-    url = (
-        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
-        f"?key={FIREBASE_API_KEY}"
-    )
-    payload = {
-        "email": email,
-        "password": password,
-        "returnSecureToken": True
-    }
-    r = requests.post(url, json=payload)
-    return r.json()
-
-def firebase_signup(email, password):
-    url = (
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp"
-        f"?key={FIREBASE_API_KEY}"
-    )
-    payload = {
-        "email": email,
-        "password": password,
-        "returnSecureToken": True
-    }
-    r = requests.post(url, json=payload)
-    return r.json()
-# ---------- AUTH CONFIG ----------
-FIREBASE_API_KEY = st.secrets["firebase_web"]["apiKey"]
-
-def firebase_login(email, password):
-    url = (
-        "https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword"
-        f"?key={FIREBASE_API_KEY}"
-    )
-    payload = {
-        "email": email,
-        "password": password,
-        "returnSecureToken": True
-    }
-    r = requests.post(url, json=payload)
-    return r.json()
-
-def firebase_signup(email, password):
-    url = (
-        "https://identitytoolkit.googleapis.com/v1/accounts:signUp"
-        f"?key={FIREBASE_API_KEY}"
-    )
-    payload = {
-        "email": email,
-        "password": password,
-        "returnSecureToken": True
-    }
-    r = requests.post(url, json=payload)
-    return r.json()
 
 
 
